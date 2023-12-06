@@ -51,12 +51,21 @@ export const nearRouter = createTRPCRouter({
       );
 
       if (input.accountId in response) {
-        return profileSchema.parse(response[input.accountId]?.profile);
+        return profileSchema.parse({
+          ...response[input.accountId]?.profile,
+          account_id: input.accountId,
+        });
       }
 
       return {
+        account_id: input.accountId,
         name: "",
         image: { url: placeholderImage },
+        description: "",
+        funding_goal: "",
+        current_funding: "",
+        timeline: "",
+        team: {},
       } satisfies Profile;
     }),
 });

@@ -32,9 +32,22 @@ export const imageSchema = z
 
 export type Image = z.infer<typeof imageSchema>;
 
+export const teamMemberSchema = z.object({
+  account_id: accountIdSchema.optional(),
+  name: z.string(),
+  image: imageSchema,
+  background: z.string(),
+});
+
 export const profileSchema = z.object({
+  account_id: accountIdSchema,
   name: z.string().optional().default(""),
   image: imageSchema,
+  description: z.string().optional().default(""),
+  funding_goal: z.string().optional().default(""),
+  current_funding: z.string().optional().default(""),
+  timeline: z.string().optional().default(""),
+  team: z.record(z.string(), teamMemberSchema).optional().default({}),
 });
 
 export type Profile = z.infer<typeof profileSchema>;
