@@ -9,6 +9,7 @@ export function Header() {
         <div className="flex flex-row items-center justify-start gap-2">
           <Image
             src="/blockraise.png"
+            alt="BlockRaise"
             unoptimized
             width={60}
             height={60}
