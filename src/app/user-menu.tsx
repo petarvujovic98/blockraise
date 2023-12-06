@@ -18,7 +18,7 @@ import { Icon } from "~/components/icon";
 export function UserMenu() {
   const accountId = useAccountId();
   const { data } = api.near.profile.useQuery({
-    accountId: accountId ?? "social.near",
+    account_id: accountId ?? "social.near",
   });
 
   if (!accountId) {
