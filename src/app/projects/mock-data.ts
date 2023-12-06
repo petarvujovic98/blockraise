@@ -4,7 +4,7 @@ export const MOCK_PROJECTS: Profile[] = Array.from({ length: 4 }, () => ({
   account_id: "blockraise.near",
   name: "Blockraise",
   image: {
-    url: "/blockraise.png",
+    url: "https://blockraise-petarvujovic-near.vercel.app/blockraise.png",
   },
   description: "Blockraise is a decentralized crowdfunding platform.",
   timeline: "2024",

@@ -19,6 +19,8 @@ export function Icon({
       url = ipfsURL(image.ipfs_cid ?? "");
     } else if ("img" in image) {
       url = image.img ?? "";
+    } else if ("url" in image) {
+      url = image.url ?? "";
     }
   }
 
