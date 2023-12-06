@@ -121,7 +121,7 @@ export function ProjectCardMock({ profile }: { profile: Profile }) {
               image={profile.image}
               className="h-12 w-12 rounded-full"
             />
-            <b>{profile.name ?? profile.accountId}</b>
+            <b>{profile.name ?? profile.account_id}</b>
           </Link>
         </CardTitle>
         <CardDescription>{profile.description}</CardDescription>
