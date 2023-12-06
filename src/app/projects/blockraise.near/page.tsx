@@ -2,7 +2,12 @@ import { Icon } from "~/components/icon";
 import { Progress } from "~/components/ui/progress";
 import { NUMBER } from "~/lib/format";
 import { MOCK_PROJECTS } from "../mock-data";
-import { Card, CardDescription, CardHeader } from "~/components/ui/card";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 
 export default function ProjectPage() {
   const project = MOCK_PROJECTS[0]!;
@@ -51,7 +56,7 @@ export default function ProjectPage() {
                   image={member.image}
                   className="h-12 w-12 rounded-full"
                 />
-                <b>{member.name ?? member.account_id}</b>
+                <CardTitle>{member.name ?? member.account_id}</CardTitle>
                 <CardDescription>{member.background}</CardDescription>
               </CardHeader>
             </Card>
