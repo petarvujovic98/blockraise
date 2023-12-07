@@ -43,11 +43,15 @@ export const profileSchema = z.object({
   account_id: accountIdSchema,
   name: z.string().optional().default(""),
   image: imageSchema,
-  description: z.string().optional().default(""),
-  funding_goal: z.string().optional().default(""),
-  current_funding: z.string().optional().default(""),
-  timeline: z.string().optional().default(""),
-  team: z.record(z.string(), teamMemberSchema).optional().default({}),
+  blockraise: z
+    .object({
+      description: z.string().optional().default(""),
+      funding_goal: z.string().optional().default(""),
+      current_funding: z.string().optional().default(""),
+      timeline: z.string().optional().default(""),
+      team: z.record(z.string(), teamMemberSchema).optional().default({}),
+    })
+    .default({}),
 });
 
 export type Profile = z.infer<typeof profileSchema>;

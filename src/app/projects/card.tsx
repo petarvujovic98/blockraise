@@ -17,7 +17,7 @@ import { type Profile } from "~/lib/validation/common";
 import { NUMBER } from "~/lib/format";
 
 export function ProjectCard({ accountId }: { accountId: string }) {
-  const { data, status } = api.near.profile.useQuery({ accountId });
+  const { data, status } = api.near.profile.useQuery({ account_id: accountId });
 
   if (status === "loading") {
     return <ProjectCardSkeleton />;
@@ -43,19 +43,20 @@ export function ProjectCard({ accountId }: { accountId: string }) {
             <b>{data.name ?? accountId}</b>
           </Link>
         </CardTitle>
-        <CardDescription>{data.description}</CardDescription>
+        <CardDescription>{data.blockraise.description}</CardDescription>
       </CardHeader>
-      <CardContent>{data.timeline}</CardContent>
+      <CardContent>{data.blockraise.timeline}</CardContent>
       <CardFooter className="flex-col">
         <Progress
           value={Math.min(
-            (Number(data.current_funding) * 100) / Number(data.funding_goal),
+            (Number(data.blockraise.current_funding) * 100) /
+            Number(data.blockraise.funding_goal),
             100,
           )}
         />
         <div className="flex flex-row items-center justify-center gap-2">
-          {NUMBER.compact(Number(data.current_funding))}/
-          {NUMBER.compact(Number(data.funding_goal))}
+          {NUMBER.compact(Number(data.blockraise.current_funding))}/
+          {NUMBER.compact(Number(data.blockraise.funding_goal))}
         </div>
       </CardFooter>
     </Card>
@@ -124,20 +125,20 @@ export function ProjectCardMock({ profile }: { profile: Profile }) {
             <b>{profile.name ?? profile.account_id}</b>
           </Link>
         </CardTitle>
-        <CardDescription>{profile.description}</CardDescription>
+        <CardDescription>{profile.blockraise.description}</CardDescription>
       </CardHeader>
-      <CardContent>{profile.timeline}</CardContent>
+      <CardContent>{profile.blockraise.timeline}</CardContent>
       <CardFooter className="flex-col">
         <Progress
           value={Math.min(
-            (Number(profile.current_funding) * 100) /
-            Number(profile.funding_goal),
+            (Number(profile.blockraise.current_funding) * 100) /
+            Number(profile.blockraise.funding_goal),
             100,
           )}
         />
         <div className="flex flex-row items-center justify-center gap-2">
-          {NUMBER.compact(Number(profile.current_funding))}/
-          {NUMBER.compact(Number(profile.funding_goal))}
+          {NUMBER.compact(Number(profile.blockraise.current_funding))}/
+          {NUMBER.compact(Number(profile.blockraise.funding_goal))}
         </div>
       </CardFooter>
     </Card>
