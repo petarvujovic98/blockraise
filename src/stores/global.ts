@@ -6,6 +6,7 @@ import { type WalletSelectorModal } from "@near-wallet-selector/modal-ui";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { create } from "zustand";
+import { TX_GAS } from "~/lib/constants/tx";
 
 interface GlobalStore {
   selector: WalletSelector | null;
@@ -65,13 +66,11 @@ export function useSignOut() {
   );
 }
 
-export const GAS = "300000000000000";
-
 export function useSignTx() {
   const selector = useWalletSelector();
 
   return React.useCallback(
-    async (methodName: string, args: object) => {
+    async (methodName: string, args: object, deposit = 0n) => {
       try {
         const wallet = await selector?.wallet();
         await wallet?.signAndSendTransaction({
@@ -81,8 +80,8 @@ export function useSignTx() {
               params: {
                 methodName,
                 args,
-                gas: GAS,
-                deposit: "0",
+                gas: TX_GAS.toString(),
+                deposit: deposit.toString(),
               },
             },
           ],
