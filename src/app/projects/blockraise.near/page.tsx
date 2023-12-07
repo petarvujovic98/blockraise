@@ -17,14 +17,14 @@ export default function ProjectPage() {
       <div>
         <Progress
           value={Math.min(
-            (Number(project.current_funding) * 100) /
-            Number(project.funding_goal),
+            (Number(project.blockraise.current_funding) * 100) /
+            Number(project.blockraise.funding_goal),
             100,
           )}
         />
         <div className="flex flex-row items-center justify-center gap-2">
-          {NUMBER.compact(Number(project.current_funding))}/
-          {NUMBER.compact(Number(project.funding_goal))}
+          {NUMBER.compact(Number(project.blockraise.current_funding))}/
+          {NUMBER.compact(Number(project.blockraise.funding_goal))}
         </div>
       </div>
       <div className="flex flex-row items-start justify-start gap-4">
@@ -33,19 +33,19 @@ export default function ProjectPage() {
           {project.name ?? project.account_id}
         </h1>
       </div>
-      <p>{project.description}</p>
+      <p>{project.blockraise.description}</p>
       <div>
         <h2 className="pb-8 text-2xl font-semibold text-deep-navy-blue">
           Project timeline:
         </h2>
-        {project.timeline}
+        {project.blockraise.timeline}
       </div>
       <div>
         <h2 className="pb-8 text-2xl font-semibold text-deep-navy-blue">
           Team members:
         </h2>
         <div className="flex w-full flex-row items-center gap-4">
-          {Object.values(project.team).map((member) => (
+          {Object.values(project.blockraise.team).map((member) => (
             <Card
               key={member.name}
               className="flex flex-col items-center justify-start gap-4"
