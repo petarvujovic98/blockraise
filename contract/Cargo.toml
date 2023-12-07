@@ -1,7 +1,7 @@
 [package]
-name = "hello_near"
+name = "blockraise"
 version = "1.0.0"
-authors = ["Near Inc <hello@near.org>"]
+authors = ["Petar Vujovic <petarvujovic98@gmail.com>"]
 edition = "2021"
 
 [lib]
@@ -21,3 +21,4 @@ overflow-checks = true
 
 [workspace]
 members = ["sandbox-rs"]
+
