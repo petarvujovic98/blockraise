@@ -14,16 +14,16 @@ export function Navbar() {
     <NavigationMenu>
       <NavigationMenuList>
         <NavigationMenuItem>
-          <Link href="/" passHref legacyBehavior>
+          <Link href="/projects" passHref legacyBehavior>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              Home
+              Projects
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <Link href="/projects" passHref legacyBehavior>
+          <Link href="/campaigns/create" passHref legacyBehavior>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              Projects
+              Create campaign
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>

@@ -1,12 +1,16 @@
 import Image from "next/image";
 import { Navbar } from "./navbar";
 import { UserMenu } from "./user-menu";
+import Link from "next/link";
 
 export function Header() {
   return (
     <header className="flex w-full flex-col items-stretch justify-start gap-4 bg-vibrant-blue py-4">
       <div className="mx-auto flex w-full max-w-screen-xl flex-row items-center justify-between px-4">
-        <div className="flex flex-row items-center justify-start gap-2">
+        <Link
+          className="flex flex-row items-center justify-start gap-2"
+          href="/"
+        >
           <Image
             src="/blockraise.png"
             alt="BlockRaise"
@@ -16,7 +20,7 @@ export function Header() {
             className="rounded-full"
           />
           <b className="text-5xl font-bold text-deep-navy-blue">BlockRaise</b>
-        </div>
+        </Link>
         <Navbar />
         <UserMenu />
       </div>
