@@ -84,19 +84,13 @@ export async function viewStorageBalance(account_id: string) {
 }
 
 export async function viewCampaigns() {
-  const response = await viewCall<Record<string, unknown>>(
-    "social.near",
-    "keys",
-    {
-      keys: [`nearhorizon.near/profile/blockraise/campaigns/*`],
-    },
-  );
+  const response = await viewCall<{
+    "nearhorizon.near": {
+      profile: { blockraise: { campaigns: Record<string, boolean> } };
+    };
+  }>("social.near", "keys", {
+    keys: [`nearhorizon.near/profile/blockraise/campaigns/*`],
+  });
 
-  return Object.keys(
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    response["nearhorizon.near"].profile.blockraise.campaigns as Record<
-      string,
-      boolean
-    >,
-  );
+  return Object.keys(response["nearhorizon.near"].profile.blockraise.campaigns);
 }
