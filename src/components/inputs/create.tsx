@@ -11,38 +11,54 @@ import { ImageInput } from "./image";
 import { NumberInput } from "./number";
 import { TextInput } from "./text";
 import { TextAreaInput } from "./text-area";
+import { useAccountId, useSignTx } from "~/stores/global";
+import { calculateDeposit } from "~/lib/social";
 
 const createCampaignSchema = z.object({
   name: z.string().min(3),
   description: z.string().min(3),
   goal: z.number().min(1),
-  image: z.string().url(),
-  userId: z.number().min(1),
+  image: z.string().min(1),
   category: z.enum(["Business", "Charity", "Education", "Medical"]),
 });
 
 export function CreateCampaignInput() {
+  const accountId = useAccountId();
   const form = useZodForm(createCampaignSchema);
   const [cid, setCid] = useState<string>("");
+  const signTx = useSignTx();
 
   return (
     <Form {...form}>
-      <form>
+      <form
+        onSubmit={form.handleSubmit(async (data) => {
+          const profile = {
+            blockraise: {
+              campaigns: {
+                [data.name]: {
+                  ...data,
+                  image: cid,
+                  goal: String(data.goal),
+                },
+              },
+            },
+          };
+          const deposit = await calculateDeposit(accountId!, profile);
+          await signTx("set", { data: { [accountId!]: { profile } } }, deposit);
+        })}
+      >
         <ImageInput
-          name={"image"}
+          name="image"
           control={form.control}
           label="Photo"
           rules={{ required: true }}
           defaultValue=""
-          setCid={(cid) => {
-            setCid(() => {
-              return cid;
-            });
-          }}
+          setCid={(cid) => setCid(cid)}
           cid={cid}
           generate
           generateEnabled={form.formState.isValid && form.formState.isDirty}
         />
+
         <ComboboxInput
           control={form.control}
           name="category"
@@ -62,6 +78,7 @@ export function CreateCampaignInput() {
           rules={{ required: true }}
           disabled={false}
         />
+
         <TextAreaInput
           control={form.control}
           name="description"
@@ -70,6 +87,7 @@ export function CreateCampaignInput() {
           disabled={false}
           maxLength={500}
         />
+
         <NumberInput
           control={form.control}
           name="goal"
@@ -77,7 +95,9 @@ export function CreateCampaignInput() {
           rules={{ required: true }}
           disabled={false}
         />
+
         <Button
+          type="submit"
           variant="default"
           disabled={!form.formState.isValid}
           className="inline-flex flex-row items-center justify-between gap-2"
