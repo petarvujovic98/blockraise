@@ -168,10 +168,10 @@ impl Contract {
             "ERR_CAMPAIGN_NOT_FOUND"
         );
         let campaign = campaigns.get_mut(&campaign_number).unwrap();
-        require!(
-            campaign.status == CampaignStatus::Active,
-            "ERR_CAMPAIGN_NOT_ACTIVE"
-        );
+        // require!(
+        //     campaign.status == CampaignStatus::Active,
+        //     "ERR_CAMPAIGN_NOT_ACTIVE"
+        // );
         require!(
             env::block_timestamp_ms() > campaign.deadline,
             "ERR_CAMPAIGN_NOT_EXPIRED"

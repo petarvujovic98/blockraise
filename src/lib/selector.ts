@@ -9,7 +9,11 @@ import { BLOCK_RAISE_CONTRACT_ID } from "./constants/tx";
 export const setupSelector = () => {
   return setupWalletSelector({
     network: "mainnet",
-    modules: [setupMyNearWallet()],
+    modules: [
+      setupMyNearWallet({
+        successUrl: `${window.location.protocol}//${window.location.host}/register`,
+      }),
+    ],
   });
 };
 

@@ -14,6 +14,8 @@ import { Progress } from "~/components/ui/progress";
 import { Skeleton } from "~/components/ui/skeleton";
 import { api } from "~/trpc/react";
 import { DATE, NUMBER } from "~/lib/format";
+import { Badge } from "~/components/ui/badge";
+import { type Campaign } from "~/lib/validation/common";
 
 export function ProjectCard({
   owner_account_id,
@@ -56,6 +58,7 @@ export function ProjectCard({
             />
             <b>{data.name ?? `${owner_account_id}-${campaign_number}`}</b>
           </Link>
+          <CampaignStatusBadge status={data.status} />
         </CardTitle>
         <CardDescription className="truncate">
           {data.description}
@@ -114,5 +117,27 @@ export function ProjectCardEmpty() {
         <Skeleton className="h-4 w-full animate-none" />
       </CardFooter>
     </Card>
+  );
+}
+
+export function CampaignStatusBadge({
+  status,
+}: {
+  status: Campaign["status"];
+}) {
+  return (
+    <Badge
+      variant={
+        status === "Active"
+          ? "outline"
+          : status === "Inactive"
+            ? "secondary"
+            : status === "Completed"
+              ? "default"
+              : "destructive"
+      }
+    >
+      {status}
+    </Badge>
   );
 }

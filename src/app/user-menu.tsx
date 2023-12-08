@@ -1,10 +1,10 @@
 "use client";
 
-// import Link from "next/link";
+import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  // DropdownMenuItem,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -38,6 +38,11 @@ export function UserMenu() {
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuLabel>Account</DropdownMenuLabel>
+          <UserMenuItem
+            href="/campaigns/create"
+            text="Create campaign"
+            disabled={false}
+          />
           <DropdownMenuSeparator />
           <SignOut />
         </DropdownMenuContent>
@@ -46,18 +51,18 @@ export function UserMenu() {
   );
 }
 
-// function UserMenuItem({
-//   href,
-//   text,
-//   disabled = false,
-// }: {
-//   href: string;
-//   text: string;
-//   disabled: boolean;
-// }) {
-//   return (
-//     <DropdownMenuItem disabled={disabled}>
-//       <Link href={href}>{text}</Link>
-//     </DropdownMenuItem>
-//   );
-// }
+function UserMenuItem({
+  href,
+  text,
+  disabled = false,
+}: {
+  href: string;
+  text: string;
+  disabled: boolean;
+}) {
+  return (
+    <DropdownMenuItem disabled={disabled}>
+      <Link href={href}>{text}</Link>
+    </DropdownMenuItem>
+  );
+}

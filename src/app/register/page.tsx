@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { ImageInput } from "~/components/inputs/image";
@@ -12,7 +13,7 @@ import {
   SOCIAL_CONTRACT_ID,
   TX_GAS,
 } from "~/lib/constants/tx";
-import { viewProfile } from "~/lib/fetch";
+import { viewProfile, viewUsers } from "~/lib/fetch";
 import { calculateDeposit } from "~/lib/social";
 import {
   useAccountId,
@@ -33,6 +34,7 @@ export default function RegisterPage() {
   const signTx = useSignTx();
   const signTxs = useSignTxs();
   const signIn = useSignIn();
+  const router = useRouter();
 
   useEffect(() => {
     if (!accountId) {
@@ -42,6 +44,13 @@ export default function RegisterPage() {
       .then((profile) => {
         setCid("ipfs_cid" in profile.image ? profile.image.ipfs_cid : "");
         form.setValue("name", profile.name);
+      })
+      .catch(console.error);
+    viewUsers()
+      .then((users) => {
+        if (users.includes(accountId)) {
+          router.push("/");
+        }
       })
       .catch(console.error);
   }, [accountId, form]);

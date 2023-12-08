@@ -29,7 +29,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`bg-soft-light-blue font-sans ${inter.variable}`}>
+      <body className={`bg-slate-50 font-sans ${inter.variable}`}>
         <Providers cookies={cookies().toString()}>
           <Header />
           <main className="mx-auto min-h-screen max-w-screen-xl px-8">

@@ -4,6 +4,7 @@ import { NUMBER } from "~/lib/format";
 import { api } from "~/trpc/server";
 import { ContributeSheet } from "./contribution-sheet";
 import { CTAs } from "./ctas";
+import { CampaignStatusBadge } from "../../card";
 
 export default async function ProjectPage({
   params: { owner_account_id, campaign_number },
@@ -22,45 +23,52 @@ export default async function ProjectPage({
   const goal = campaign.goal;
 
   return (
-    <div>
-      <div>
-        <Progress value={Math.min((current * 100) / goal, 100)} />
-        <div className="flex flex-row items-center justify-center gap-2">
-          {NUMBER.compact(current)}/{NUMBER.compact(goal)}
-        </div>
-        {campaign.status === "Active" && (
-          <ContributeSheet
-            campaign_number={Number(campaign_number)}
-            owner_account_id={owner_account_id}
+    <div className="flex w-full flex-col items-start justify-start gap-4 pt-10">
+      <div className="grid w-full grid-cols-12 gap-8">
+        <div className="col-span-7 flex flex-col items-start justify-start gap-4">
+          <h1 className="text-4xl font-bold text-deep-navy-blue">
+            {campaign.name ?? owner_account_id}
+          </h1>
+          <Icon
             name={campaign.name}
-            missing={Math.max(goal - current, 1)}
+            image={{ ipfs_cid: campaign.image }}
+            className="h-64 w-full rounded-2xl"
           />
-        )}
-        <CTAs
-          campaign={campaign}
-          campaign_number={Number(campaign_number)}
-          owner_account_id={owner_account_id}
-        />
-      </div>
-      <div className="flex flex-row items-start justify-start gap-4">
-        <Icon
-          name={campaign.name}
-          image={{ ipfs_cid: campaign.image }}
-          className="h-24 w-24 rounded-2xl"
-        />
-        <h1 className="text-4xl font-bold text-deep-navy-blue">
-          {campaign.name ?? owner_account_id}
-        </h1>
+        </div>
+        <div className="col-span-5 flex w-full flex-col items-start justify-start gap-4">
+          <Progress value={Math.min((current * 100) / goal, 100)} />
+          <div className="relative flex w-full flex-row items-center justify-center gap-2">
+            {NUMBER.compact(current)}/{NUMBER.compact(goal)}
+            <span className="absolute right-0">
+              <CampaignStatusBadge status={campaign.status} />
+            </span>
+          </div>
+          <div className="flex w-full flex-row items-center justify-between">
+            {campaign.status === "Active" && (
+              <ContributeSheet
+                campaign_number={Number(campaign_number)}
+                owner_account_id={owner_account_id}
+                name={campaign.name}
+                missing={Math.max(goal - current, 1)}
+              />
+            )}
+            <CTAs
+              campaign={campaign}
+              campaign_number={Number(campaign_number)}
+              owner_account_id={owner_account_id}
+            />
+          </div>
+        </div>
       </div>
       <p>{campaign.description}</p>
       <div>
-        <h2 className="pb-8 text-2xl font-semibold text-deep-navy-blue">
+        <h2 className="pb-4 text-2xl font-semibold text-deep-navy-blue">
           Project timeline:
         </h2>
         {new Date(campaign.deadline).toLocaleDateString()}
       </div>
       <div>
-        <h2 className="pb-8 text-2xl font-semibold text-deep-navy-blue">
+        <h2 className="pb-4 text-2xl font-semibold text-deep-navy-blue">
           Team members:
         </h2>
         {Object.values(campaign.team).map((member) => (

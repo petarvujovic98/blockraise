@@ -21,8 +21,7 @@ export function CTAs({
   if (
     !isOwner ||
     campaign.status === "Completed" ||
-    campaign.status === "Failed" ||
-    expired
+    campaign.status === "Failed"
   ) {
     return <></>;
   }
@@ -46,7 +45,17 @@ export function CTAs({
       );
     }
 
-    return <></>;
+    return (
+      <Button
+        type="button"
+        variant="destructive"
+        onClick={() =>
+          signTx("fail_campaign", { owner_account_id, campaign_number }, 1n)
+        }
+      >
+        Mark as failed
+      </Button>
+    );
   }
 
   if (expired) {
