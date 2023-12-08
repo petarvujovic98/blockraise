@@ -35,23 +35,63 @@ export type Image = z.infer<typeof imageSchema>;
 export const teamMemberSchema = z.object({
   account_id: accountIdSchema.optional(),
   name: z.string(),
-  image: imageSchema,
+  image: z.string(),
   background: z.string(),
+});
+
+export const createTeamMemberSchema = z.object({
+  account_id: accountIdSchema.optional(),
+  name: z.string().min(1).max(50),
+  image: z.string().min(1),
+  background: z.string().min(10).max(500),
+});
+
+export const contributorSchema = z.record(z.string(), z.number());
+
+export const categorySchema = z.enum([
+  "Business",
+  "Charity",
+  "Education",
+  "Medical",
+]);
+
+export const campaignStatusSchema = z.enum([
+  "Active",
+  "Completed",
+  "Failed",
+  "Inactive",
+]);
+
+export const campaignSchema = z.object({
+  account_id: accountIdSchema,
+  owner: accountIdSchema,
+  name: z.string(),
+  description: z.string(),
+  goal: z.number(),
+  contributors: contributorSchema,
+  deadline: z.number(),
+  image: z.string(),
+  team: z.record(z.string(), teamMemberSchema),
+  category: categorySchema,
+  status: campaignStatusSchema,
+});
+
+export type Campaign = z.infer<typeof campaignSchema>;
+
+export const createCampaignSchema = z.object({
+  name: z.string().min(5).max(50),
+  description: z.string().min(50).max(1000),
+  goal: z.number().min(1).max(1_000_000_000_000),
+  deadline: z.date({ coerce: true }).min(new Date()),
+  image: z.string().min(1),
+  category: categorySchema,
+  team: createTeamMemberSchema.array(),
 });
 
 export const profileSchema = z.object({
   account_id: accountIdSchema,
   name: z.string().optional().default(""),
   image: imageSchema,
-  blockraise: z
-    .object({
-      description: z.string().optional().default(""),
-      funding_goal: z.string().optional().default(""),
-      current_funding: z.string().optional().default(""),
-      timeline: z.string().optional().default(""),
-      team: z.record(z.string(), teamMemberSchema).optional().default({}),
-    })
-    .default({}),
 });
 
 export type Profile = z.infer<typeof profileSchema>;

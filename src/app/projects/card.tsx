@@ -13,11 +13,19 @@ import {
 import { Progress } from "~/components/ui/progress";
 import { Skeleton } from "~/components/ui/skeleton";
 import { api } from "~/trpc/react";
-import { type Profile } from "~/lib/validation/common";
-import { NUMBER } from "~/lib/format";
+import { DATE, NUMBER } from "~/lib/format";
 
-export function ProjectCard({ accountId }: { accountId: string }) {
-  const { data, status } = api.near.profile.useQuery({ account_id: accountId });
+export function ProjectCard({
+  owner_account_id,
+  campaign_number,
+}: {
+  owner_account_id: string;
+  campaign_number: number;
+}) {
+  const { data, status } = api.near.campaign.useQuery({
+    owner_account_id,
+    campaign_number,
+  });
 
   if (status === "loading") {
     return <ProjectCardSkeleton />;
@@ -27,36 +35,37 @@ export function ProjectCard({ accountId }: { accountId: string }) {
     return <ProjectCardEmpty />;
   }
 
+  const current = Object.values(data.contributors).reduce(
+    (sum, c) => sum + c,
+    0,
+  );
+  const goal = data.goal;
+
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle>
           <Link
-            href={`/projects/${accountId}`}
+            href={`/projects/${owner_account_id}/${campaign_number}`}
             className="flex flex-row items-center justify-start gap-3"
           >
             <Icon
               name={data.name}
-              image={data.image}
+              image={{ ipfs_cid: data.image }}
               className="h-12 w-12 rounded-full"
             />
-            <b>{data.name ?? accountId}</b>
+            <b>{data.name ?? `${owner_account_id}-${campaign_number}`}</b>
           </Link>
         </CardTitle>
-        <CardDescription>{data.blockraise.description}</CardDescription>
+        <CardDescription className="truncate">
+          {data.description}
+        </CardDescription>
       </CardHeader>
-      <CardContent>{data.blockraise.timeline}</CardContent>
+      <CardContent>{DATE.date(data.deadline)}</CardContent>
       <CardFooter className="flex-col">
-        <Progress
-          value={Math.min(
-            (Number(data.blockraise.current_funding) * 100) /
-            Number(data.blockraise.funding_goal),
-            100,
-          )}
-        />
+        <Progress value={Math.min((current * 100) / goal, 100)} />
         <div className="flex flex-row items-center justify-center gap-2">
-          {NUMBER.compact(Number(data.blockraise.current_funding))}/
-          {NUMBER.compact(Number(data.blockraise.funding_goal))}
+          {NUMBER.compact(current)}/{NUMBER.compact(goal)}
         </div>
       </CardFooter>
     </Card>
@@ -103,43 +112,6 @@ export function ProjectCardEmpty() {
       </CardContent>
       <CardFooter>
         <Skeleton className="h-4 w-full animate-none" />
-      </CardFooter>
-    </Card>
-  );
-}
-
-export function ProjectCardMock({ profile }: { profile: Profile }) {
-  return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>
-          <Link
-            href={`/projects/${profile.account_id}`}
-            className="flex flex-row items-center justify-start gap-3"
-          >
-            <Icon
-              name={profile.name}
-              image={profile.image}
-              className="h-12 w-12 rounded-full"
-            />
-            <b>{profile.name ?? profile.account_id}</b>
-          </Link>
-        </CardTitle>
-        <CardDescription>{profile.blockraise.description}</CardDescription>
-      </CardHeader>
-      <CardContent>{profile.blockraise.timeline}</CardContent>
-      <CardFooter className="flex-col">
-        <Progress
-          value={Math.min(
-            (Number(profile.blockraise.current_funding) * 100) /
-            Number(profile.blockraise.funding_goal),
-            100,
-          )}
-        />
-        <div className="flex flex-row items-center justify-center gap-2">
-          {NUMBER.compact(Number(profile.blockraise.current_funding))}/
-          {NUMBER.compact(Number(profile.blockraise.funding_goal))}
-        </div>
       </CardFooter>
     </Card>
   );

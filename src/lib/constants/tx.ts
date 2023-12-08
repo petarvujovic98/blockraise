@@ -8,3 +8,6 @@ export const EXTRA_STORAGE_BALANCE: bigint = STORAGE_COST_PER_BYTE * 2000n;
 
 export const TGAS: bigint = 10n ** 12n;
 export const TX_GAS: bigint = 300n * TGAS;
+
+export const SOCIAL_CONTRACT_ID = "social.near";
+export const BLOCK_RAISE_CONTRACT_ID = "block-raise.near";

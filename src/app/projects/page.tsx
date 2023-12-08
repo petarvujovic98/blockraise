@@ -1,49 +1,49 @@
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
-import { MOCK_PROJECTS } from "./mock-data";
-import { ProjectCardMock } from "./card";
+import { ProjectCard } from "./card";
+import { viewCampaignsWithDetails } from "~/lib/fetch";
+import { type Campaign } from "~/lib/validation/common";
 
-export default function ProjectsPage() {
+export default async function ProjectsPage() {
+  const campaigns = await viewCampaignsWithDetails();
+
+  const groupings = campaigns.reduce(
+    (acc, campaign) => {
+      const [, { category }] = campaign;
+      const categoryArray:
+        | (readonly [readonly [string, number], Campaign])[]
+        | undefined = acc[category];
+
+      if (!categoryArray) {
+        acc[category] = [campaign];
+        return acc;
+      }
+
+      categoryArray.push(campaign);
+      return acc;
+    },
+    {} as Record<
+      Campaign["category"],
+      (readonly [readonly [string, number], Campaign])[]
+    >,
+  );
+
   return (
     <div className="pt-10">
       <h1 className="text-4xl font-bold text-deep-navy-blue">Projects</h1>
-      <Section title="Technology">
-        <ScrollArea>
-          <div className="flex flex-row items-stretch justify-start gap-4 pb-5">
-            {MOCK_PROJECTS.map((project) => (
-              <div key={project.account_id} className="w-96">
-                <ProjectCardMock profile={project} />
-              </div>
-            ))}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </Section>
-
-      <Section title="Art">
-        <ScrollArea>
-          <div className="flex flex-row items-stretch justify-start gap-4 pb-5">
-            {MOCK_PROJECTS.map((project) => (
-              <div key={project.account_id} className="w-96">
-                <ProjectCardMock profile={project} />
-              </div>
-            ))}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </Section>
-
-      <Section title="Social impact">
-        <ScrollArea>
-          <div className="flex flex-row items-stretch justify-start gap-4 pb-5">
-            {MOCK_PROJECTS.map((project) => (
-              <div key={project.account_id} className="w-96">
-                <ProjectCardMock profile={project} />
-              </div>
-            ))}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </Section>
+      {Object.entries(groupings).map(([category, campaigns]) => (
+        <Section key={category} title={category}>
+          <ScrollArea>
+            <div className="flex flex-row items-stretch justify-start gap-4 pb-5">
+              {campaigns.map(([[owner, id]]) => (
+                <div key={`${owner}-${id}`} className="w-96">
+                  <ProjectCard owner_account_id={owner} campaign_number={id} />
+                </div>
+              ))}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+        </Section>
+      ))}
     </div>
   );
 }

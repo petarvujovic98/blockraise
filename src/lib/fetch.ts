@@ -1,13 +1,16 @@
 import { providers } from "near-api-js";
 import { type CodeResult } from "near-api-js/lib/providers/provider";
 import {
+  campaignSchema,
   placeholderImage,
   type Profile,
   profileSchema,
 } from "./validation/common";
 import {
+  BLOCK_RAISE_CONTRACT_ID,
   INITIAL_ACCOUNT_STORAGE_BALANCE,
   MIN_STORAGE_BALANCE,
+  SOCIAL_CONTRACT_ID,
 } from "./constants/tx";
 
 function getProvider() {
@@ -40,7 +43,7 @@ export async function viewCall<T>(
 
 export async function viewProfile(account_id: string) {
   const response = await viewCall<Record<string, { profile: Profile }>>(
-    "social.near",
+    SOCIAL_CONTRACT_ID,
     "get",
     {
       keys: [`${account_id}/profile/**`],
@@ -58,13 +61,6 @@ export async function viewProfile(account_id: string) {
     account_id,
     name: "",
     image: { url: placeholderImage },
-    blockraise: {
-      description: "",
-      funding_goal: "",
-      current_funding: "",
-      timeline: "",
-      team: {},
-    },
   } satisfies Profile;
 }
 
@@ -72,7 +68,7 @@ export async function viewStorageBalance(account_id: string) {
   const response = await viewCall<{
     total: string;
     available: string;
-  }>("social.near", "storage_balance_of", {
+  }>(SOCIAL_CONTRACT_ID, "storage_balance_of", {
     account_id,
   });
 
@@ -83,14 +79,93 @@ export async function viewStorageBalance(account_id: string) {
   ) as [bigint, bigint, bigint];
 }
 
-export async function viewCampaigns() {
-  const response = await viewCall<{
-    "nearhorizon.near": {
-      profile: { blockraise: { campaigns: Record<string, boolean> } };
-    };
-  }>("social.near", "keys", {
-    keys: [`nearhorizon.near/profile/blockraise/campaigns/*`],
-  });
+export async function viewUsers() {
+  const response = await viewCall<string[]>(
+    BLOCK_RAISE_CONTRACT_ID,
+    "get_users",
+    {},
+  );
 
-  return Object.keys(response["nearhorizon.near"].profile.blockraise.campaigns);
+  return response;
+}
+
+export async function viewUserCampaigns(account_id: string) {
+  const response = await viewCall<number[]>(
+    BLOCK_RAISE_CONTRACT_ID,
+    "get_campaigns",
+    {
+      account_id,
+    },
+  );
+
+  return response;
+}
+
+export async function viewCampaigns() {
+  const users = await viewUsers();
+
+  const campaigns = await Promise.all(
+    users.map((user) =>
+      viewUserCampaigns(user).then((campaigns) =>
+        campaigns.map((campaign) => [user, campaign] as const),
+      ),
+    ),
+  );
+
+  return campaigns.flat(1);
+}
+
+export async function viewCampaignsWithDetails() {
+  const campaigns = await viewCampaigns();
+
+  return await Promise.all(
+    campaigns.map(([user, campaign_number]) =>
+      viewCampaign(user, campaign_number).then(
+        (campaign) => [[user, campaign_number], campaign] as const,
+      ),
+    ),
+  );
+}
+
+export enum CampaignStatus {
+  Active = "Active",
+  Completed = "Completed",
+  Failed = "Failed",
+  Inactive = "Inactive",
+}
+
+export enum CampaignCategory {
+  Business = "Business",
+  Charity = "Charity",
+  Education = "Education",
+  Medical = "Medical",
+}
+
+export interface Campaign {
+  account_id: string;
+  owner: string;
+  name: string;
+  description: string;
+  contributors: Record<string, number>;
+  goal: number;
+  deadline: number;
+  image: string;
+  status: CampaignStatus;
+  category: CampaignCategory;
+}
+
+export async function viewCampaign(
+  owner_account_id: string,
+  campaign_number: number,
+) {
+  const response = await viewCall<Campaign>(
+    BLOCK_RAISE_CONTRACT_ID,
+    "get_campaign",
+    {
+      owner_account_id,
+      campaign_number,
+    },
+  );
+
+  return campaignSchema.parse(response);
 }

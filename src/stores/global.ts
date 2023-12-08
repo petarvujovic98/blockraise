@@ -39,8 +39,8 @@ export function useSignIn() {
   const modal = useWalletSelectorModal();
 
   return React.useCallback(
-    (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-      event.preventDefault();
+    (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      event?.preventDefault();
       modal?.show();
     },
     [modal],
