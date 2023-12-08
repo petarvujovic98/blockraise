@@ -27,6 +27,15 @@ pub enum CampaignCategory {
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
+pub struct TeamMember {
+    account_id: AccountId,
+    name: String,
+    image: String,
+    background: String,
+}
+
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone)]
+#[serde(crate = "near_sdk::serde")]
 pub struct Campaign {
     account_id: AccountId,
     owner: AccountId,
@@ -38,6 +47,7 @@ pub struct Campaign {
     image: String,
     status: CampaignStatus,
     category: CampaignCategory,
+    team: HashMap<String, TeamMember>,
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone)]
@@ -49,12 +59,13 @@ pub struct CreateCampaign {
     deadline: u64,
     image: String,
     category: CampaignCategory,
+    team: HashMap<String, TeamMember>,
 }
 
 impl From<CreateCampaign> for Campaign {
     fn from(campaign: CreateCampaign) -> Self {
         Self {
-            account_id: env::current_account_id(),
+            account_id: env::signer_account_id(),
             owner: env::signer_account_id(),
             name: campaign.name,
             description: campaign.description,
@@ -64,6 +75,7 @@ impl From<CreateCampaign> for Campaign {
             image: campaign.image,
             status: CampaignStatus::Inactive,
             category: campaign.category,
+            team: campaign.team,
         }
     }
 }
@@ -71,7 +83,7 @@ impl From<CreateCampaign> for Campaign {
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Contract {
-    campaigns: UnorderedMap<AccountId, UnorderedMap<AccountId, Campaign>>,
+    campaigns: UnorderedMap<AccountId, UnorderedMap<u32, Campaign>>,
 }
 
 impl Default for Contract {
@@ -116,21 +128,21 @@ impl Contract {
         .expect("ERR_INVALID_ACCOUNT_ID")
     }
 
+    #[payable]
     pub fn create_campaign(&mut self, campaign: CreateCampaign) {
+        assert_one_yocto();
         let account_id = env::signer_account_id();
         self.assert_registered(&account_id);
         let campaigns = self.campaigns.get_mut(&account_id).unwrap();
-        let campaign_account_id =
-            Contract::create_campaign_account(account_id, campaigns.len() as u32 + 1);
-        require!(
-            !campaigns.contains_key(&campaign_account_id),
-            "ERR_ALREADY_REGISTERED"
-        );
-        campaigns.insert(campaign_account_id, campaign.into());
+        let count = campaigns.len() as u32 + 1;
+        require!(!campaigns.contains_key(&count), "ERR_ALREADY_REGISTERED");
+        let mut campaign = Campaign::from(campaign);
+        campaign.account_id = Contract::create_campaign_account(account_id, count);
+        campaigns.insert(count, campaign);
     }
 
-    pub fn get_campaigns(&self, account_id: AccountId) -> Vec<AccountId> {
-        let campaigns = self.campaigns.get(&account_id).unwrap();
+    pub fn get_campaigns(&self, account_id: AccountId) -> Vec<u32> {
+        let campaigns = self.campaigns.get(&account_id).expect("ERR_USER_NOT_FOUND");
         campaigns.keys().cloned().collect()
     }
 
@@ -139,10 +151,8 @@ impl Contract {
             .campaigns
             .get(&owner_account_id)
             .expect("ERR_OWNER_NOT_FOUND");
-        let campaign_account_id =
-            Contract::create_campaign_account(owner_account_id, campaign_number);
         campaigns
-            .get(&campaign_account_id)
+            .get(&campaign_number)
             .expect("ERR_CAMPAIGN_NOT_FOUND")
             .clone()
     }
@@ -153,12 +163,11 @@ impl Contract {
         let account_id = env::signer_account_id();
         self.assert_registered(&account_id);
         let campaigns = self.campaigns.get_mut(&account_id).unwrap();
-        let campaign_account_id = Contract::create_campaign_account(account_id, campaign_number);
         require!(
-            campaigns.contains_key(&campaign_account_id),
+            campaigns.contains_key(&campaign_number),
             "ERR_CAMPAIGN_NOT_FOUND"
         );
-        let campaign = campaigns.get_mut(&campaign_account_id).unwrap();
+        let campaign = campaigns.get_mut(&campaign_number).unwrap();
         require!(
             campaign.status == CampaignStatus::Active,
             "ERR_CAMPAIGN_NOT_ACTIVE"
@@ -176,12 +185,11 @@ impl Contract {
         let account_id = env::signer_account_id();
         self.assert_registered(&account_id);
         let campaigns = self.campaigns.get_mut(&account_id).unwrap();
-        let campaign_account_id = Contract::create_campaign_account(account_id, campaign_number);
         require!(
-            campaigns.contains_key(&campaign_account_id),
+            campaigns.contains_key(&campaign_number),
             "ERR_CAMPAIGN_NOT_FOUND"
         );
-        let campaign = campaigns.get_mut(&campaign_account_id).unwrap();
+        let campaign = campaigns.get_mut(&campaign_number).unwrap();
         require!(
             campaign.status == CampaignStatus::Active,
             "ERR_CAMPAIGN_NOT_ACTIVE"
@@ -199,12 +207,11 @@ impl Contract {
         let account_id = env::signer_account_id();
         self.assert_registered(&account_id);
         let campaigns = self.campaigns.get_mut(&account_id).unwrap();
-        let campaign_account_id = Contract::create_campaign_account(account_id, campaign_number);
         require!(
-            campaigns.contains_key(&campaign_account_id),
+            campaigns.contains_key(&campaign_number),
             "ERR_CAMPAIGN_NOT_FOUND"
         );
-        let campaign = campaigns.get_mut(&campaign_account_id).unwrap();
+        let campaign = campaigns.get_mut(&campaign_number).unwrap();
         require!(
             campaign.status == CampaignStatus::Inactive,
             "ERR_CAMPAIGN_NOT_INACTIVE"
@@ -218,12 +225,11 @@ impl Contract {
         let account_id = env::signer_account_id();
         self.assert_registered(&account_id);
         let campaigns = self.campaigns.get_mut(&account_id).unwrap();
-        let campaign_account_id = Contract::create_campaign_account(account_id, campaign_number);
         require!(
-            campaigns.contains_key(&campaign_account_id),
+            campaigns.contains_key(&campaign_number),
             "ERR_CAMPAIGN_NOT_FOUND"
         );
-        let campaign = campaigns.get_mut(&campaign_account_id).unwrap();
+        let campaign = campaigns.get_mut(&campaign_number).unwrap();
         require!(
             campaign.status == CampaignStatus::Active,
             "ERR_CAMPAIGN_NOT_ACTIVE"
@@ -240,13 +246,11 @@ impl Contract {
             .campaigns
             .get_mut(&owner_account_id)
             .expect("ERR_OWNER_NOT_FOUND");
-        let campaign_account_id =
-            Contract::create_campaign_account(owner_account_id, campaign_number);
         require!(
-            campaigns.contains_key(&campaign_account_id),
+            campaigns.contains_key(&campaign_number),
             "ERR_CAMPAIGN_NOT_FOUND"
         );
-        let campaign = campaigns.get_mut(&campaign_account_id).unwrap();
+        let campaign = campaigns.get_mut(&campaign_number).unwrap();
         require!(
             campaign.status == CampaignStatus::Active,
             "ERR_CAMPAIGN_NOT_ACTIVE"

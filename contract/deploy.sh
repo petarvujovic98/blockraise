@@ -1,2 +1,5 @@
 #!/bin/sh
-near dev-deploy --wasmFile ./target/wasm32-unknown-unknown/release/hello_near.wasm
+
+ACCOUNT_ID=$1
+
+NEAR_ENV=mainnet near deploy $ACCOUNT_ID --wasmFile ./target/wasm32-unknown-unknown/release/blockraise.wasm
