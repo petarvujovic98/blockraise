@@ -23,7 +23,6 @@ import {
   DialogTitle,
 } from "../ui/dialog";
 import { useRouter } from "next/navigation";
-import { subDays } from "date-fns";
 
 export function CreateCampaignInput() {
   const form = useZodForm(createCampaignSchema);
@@ -39,17 +38,20 @@ export function CreateCampaignInput() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(async (data) => {
-          const deadline = subDays(new Date(), 1);
-          await signTx("create_campaign", {
-            campaign: {
-              ...data,
-              image: cid,
-              deadline: deadline.getTime(),
-              team: Object.fromEntries(
-                data.team.map((member) => [member.name, member]),
-              ),
+          await signTx(
+            "create_campaign",
+            {
+              campaign: {
+                ...data,
+                image: cid,
+                deadline: data.deadline.getTime(),
+                team: Object.fromEntries(
+                  data.team.map((member) => [member.name, member]),
+                ),
+              },
             },
-          });
+            1n,
+          );
         })}
       >
         <Dialog
